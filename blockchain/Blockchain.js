@@ -127,13 +127,21 @@ function constructMerkleTree(inputs) {
     //TODO
 }
 
+function simulateChain(blockchain, numTxs, numBlocks) {
+    for(let i = 0; i < numBlocks; i++) {
+        let numTxsRand = Math.floor(Math.random() * Math.floor(numTxs));
+        for(let j = 0; j < numTxsRand; j++) {
+            let sender = uuid().substr(0,5);
+            let receiver = uuid().substr(0,5);
+            blockchain.createTransaction("Bruce wayne", "Tony stark",
+                                         Math.floor(Math.random() * Math.floor(1000)));
+        }
+        blockchain.mine();
+    }
+}
+
 const BChain = new Blockchain();
-BChain.createTransaction("Bruce wayne", "Tony stark", 100);
-BChain.createTransaction("Harrison wells", "Han solo", 50);
-BChain.createTransaction("Tony stark", "Ned stark", 75);
-BChain.mine();
-BChain.createTransaction("Tony stark", "Ned stark", 75);
-BChain.mine();
+simulateChain(BChain, 5, 20);
 
 console.dir(BChain,{depth:null});
 
