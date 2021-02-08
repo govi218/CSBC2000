@@ -133,7 +133,7 @@ function simulateChain(blockchain, numTxs, numBlocks) {
         for(let j = 0; j < numTxsRand; j++) {
             let sender = uuid().substr(0,5);
             let receiver = uuid().substr(0,5);
-            blockchain.createTransaction("Bruce wayne", "Tony stark",
+            blockchain.createTransaction(sender, receiver,
                                          Math.floor(Math.random() * Math.floor(1000)));
         }
         blockchain.mine();
