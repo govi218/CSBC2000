@@ -1,0 +1,15 @@
+{
+  "name": "blockchain",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Govind Mohan",
+  "license": "MIT",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "uuid": "^3.2.1"
+  }
+}
