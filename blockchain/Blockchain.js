@@ -107,15 +107,12 @@ class Blockchain {
             this.chain[i].transactions.forEach((tx) => tx_id_list.push(tx.tx_id));
 
             if(i == 0 && this.chain[i].hash !==this.getHash('0',[],'0')){
-                console.log("1");
                 return false;
             }
             if(i > 0 && this.chain[i].hash !== this.getHash(this.chain[i-1].hash, this.chain[i].transactions, '0')){
-                console.log("2");
                 return false;
             }
             if(i > 0 && this.chain[i].prevHash !== this.chain[i-1].hash){
-                console.log("3");
                 return false;
             }
         }
@@ -141,7 +138,7 @@ function simulateChain(blockchain, numTxs, numBlocks) {
 }
 
 const BChain = new Blockchain();
-simulateChain(BChain, 5, 20);
+simulateChain(BChain, 5, 3);
 
 console.dir(BChain,{depth:null});
 
