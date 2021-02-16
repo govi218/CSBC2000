@@ -43,6 +43,7 @@ class Blockchain {
     constructor() {
         this.chain = [];
         this.pendingTransactions = [];
+        this.difficulty = 5;
         this.addBlock('0');
     }
 
@@ -60,6 +61,8 @@ class Blockchain {
         let index = this.chain.length;
         let prevHash = this.chain.length !== 0 ? this.chain[this.chain.length - 1].hash : '0';
         let hash = this.getHash(prevHash, this.pendingTransactions, nonce);
+        console.log(hash)
+        console.log(nonce)
         let block = new Block(index, this.pendingTransactions, prevHash, nonce, hash);
 
         // reset pending txs
@@ -82,8 +85,16 @@ class Blockchain {
     /**
      * Find nonce that satisfies our proof of work.
      */
-    proofOfWork() {
+    proofOfWork(difficulty,pendingTransactions) {
         //TODO
+        let nonce = 0
+        let prevHash = this.chain.length !== 0 ? this.chain[this.chain.length - 1].hash : '0';
+        let hash = this.getHash(prevHash,pendingTransactions,nonce).toString()
+        while (hash.substring(0, difficulty) !== Array(difficulty + 1).join('0')) {
+            nonce++;
+            hash = this.getHash(prevHash,pendingTransactions,nonce);
+        }
+        return nonce;
     }
 
     /**
@@ -92,8 +103,8 @@ class Blockchain {
     mine() {
         let tx_id_list = [];
         this.pendingTransactions.forEach((tx) => tx_id_list.push(tx.tx_id));
-        let nonce = this.proofOfWork();
-        this.addBlock('0');
+        let nonce = this.proofOfWork(this.difficulty,this.pendingTransactions);
+        this.addBlock(nonce);
     }
 
 
@@ -110,7 +121,7 @@ class Blockchain {
                 console.log("1");
                 return false;
             }
-            if(i > 0 && this.chain[i].hash !== this.getHash(this.chain[i-1].hash, this.chain[i].transactions, '0')){
+            if(i > 0 && this.chain[i].hash !== this.getHash(this.chain[i-1].hash, this.chain[i].transactions, this.chain[i].nonce)){
                 console.log("2");
                 return false;
             }
