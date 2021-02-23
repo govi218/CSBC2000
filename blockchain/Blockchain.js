@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const uuid = require('uuid');
+const util = require("util");
 
 /**
  * Block represents a block in the blockchain. It has the
@@ -11,13 +12,14 @@ const uuid = require('uuid');
  * @hash represents the hash of the previous block
  */
 class Block {
-    constructor(index, transactions, prevHash, nonce, hash) {
+    constructor(index, transactions, prevHash, nonce, hash, merkleroot) {
         this.index = index;
         this.timestamp = Math.floor(Date.now() / 1000);
         this.transactions = transactions;
         this.prevHash = prevHash;
         this.hash = hash;
         this.nonce = nonce;
+        this.merkleroot = merkleroot;
     }
 }
 
@@ -31,6 +33,7 @@ class Transaction {
         this.sender = sender;
         this.recipient = recipient;
         this.tx_id = uuid().split('-').join();
+        this.hash = hash(this.amount+this.sender+this.recipient+this.tx_id);
     }
 }
 
@@ -43,7 +46,7 @@ class Blockchain {
     constructor() {
         this.chain = [];
         this.pendingTransactions = [];
-        this.difficulty = 5;
+        this.difficulty = 3;
         this.addBlock('0');
     }
 
@@ -60,10 +63,11 @@ class Blockchain {
     addBlock(nonce) {
         let index = this.chain.length;
         let prevHash = this.chain.length !== 0 ? this.chain[this.chain.length - 1].hash : '0';
-        let hash = this.getHash(prevHash, this.pendingTransactions, nonce);
+        let merkleroot = this.createMerkleTree(this.pendingTransactions);        
+        let hash = this.getHash(prevHash, merkleroot, nonce);
         console.log(hash)
         console.log(nonce)
-        let block = new Block(index, this.pendingTransactions, prevHash, nonce, hash);
+        let block = new Block(index, this.pendingTransactions, prevHash, nonce, hash, merkleroot);
 
         // reset pending txs
         this.pendingTransactions = [];
@@ -73,15 +77,16 @@ class Blockchain {
     /**
      * Gets the hash of a block.
      */
-    getHash(prevHash, txs, nonce) {
-        var encrypt = prevHash + nonce;
-        txs.forEach((tx) => { encrypt += tx.tx_id; });
+    getHash(prevHash, merkleroot, nonce) {
+        var encrypt = prevHash +merkleroot + nonce;
+        //txs.forEach((tx) => { encrypt += tx.tx_id; });
         var hash=crypto.createHmac('sha256', "secret")
             .update(encrypt)
             .digest('hex');
         return hash;
     }
 
+    
     /**
      * Find nonce that satisfies our proof of work.
      */
@@ -96,6 +101,28 @@ class Blockchain {
         }
         return nonce;
     }
+
+    /**
+     * Merkletree Implementation
+     */
+    createMerkleTree(pendingTransactions) {
+        let root = []
+		root.unshift(pendingTransactions);
+		root.unshift(pendingTransactions.map(t => t.hash));
+
+		while (root[0].length > 1) {
+			let temp = [];
+
+			for (let index = 0; index < root[0].length; index += 2) {
+				if (index < root[0].length - 1 && index % 2 == 0)
+					temp.push(hash(root[0][index] + root[0][index + 1]));
+				else temp.push(root[0][index]);
+			}
+			root.unshift(temp);
+		}
+        //console.log(root);
+        return root[0][0];
+	}
 
     /**
      * Mine a block and add it to the chain.
@@ -117,11 +144,11 @@ class Blockchain {
             let tx_id_list = [];
             this.chain[i].transactions.forEach((tx) => tx_id_list.push(tx.tx_id));
 
-            if(i == 0 && this.chain[i].hash !==this.getHash('0',[],'0')){
+            if(i == 0 && this.chain[i].hash !==this.getHash('0', this.chain[i].merkleroot,'0')){
                 console.log("1");
                 return false;
             }
-            if(i > 0 && this.chain[i].hash !== this.getHash(this.chain[i-1].hash, this.chain[i].transactions, this.chain[i].nonce)){
+            if(i > 0 && this.chain[i].hash !== this.getHash(this.chain[i-1].hash, this.chain[i].merkleroot, this.chain[i].nonce)){
                 console.log("2");
                 return false;
             }
@@ -134,9 +161,15 @@ class Blockchain {
     }
 }
 
-function constructMerkleTree(inputs) {
-    //TODO
+function hash(data) {
+    return data != null
+        ? crypto
+            .createHash("sha256")
+            .update(data.toString())
+            .digest("hex")
+        : "";
 }
+
 
 function simulateChain(blockchain, numTxs, numBlocks) {
     for(let i = 0; i < numBlocks; i++) {
