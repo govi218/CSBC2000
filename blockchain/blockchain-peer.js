@@ -10,7 +10,7 @@ let app = express();
 let jsonParser = bodyParser.json();
 app.use(jsonParser);
 app.use(bodyParser.urlencoded({ extended: false }));
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
 
 // blockchain config
 const BChain = new blockchain();
@@ -41,7 +41,7 @@ app.get('/mine_block', (req, res) => {
  * Calculate blockchain validity
  */
 app.get('/validate_chain', (req, res) => {
-    res.status(200).send("chainIsValid: ", BChain.chainIsValid());
+    res.status(200).send("chainIsValid: " + BChain.chainIsValid());
 });
 
 // POST Endpoints
@@ -133,7 +133,11 @@ app.post('/broadcast', (req, res) => {
         res.status(400).send('msg required!');
         return;
     }
-    broadcast(req.body.msg);
+    try {
+        broadcast(req.body.msg);
+    } catch (e) {
+        res.status(400).send(e);
+    }
     res.status(200).send("Broadcasted!");
 });
 
@@ -162,7 +166,7 @@ function broadcast(msg) {
             body: JSON.stringify({ "msg": msg })
         };
         request(options, function (error, response) {
-            if (error) throw new Error('err: '+error);
+            if (error) throw error;
             console.log('res: '+response.body);
         });
     });

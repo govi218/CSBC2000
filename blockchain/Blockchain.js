@@ -141,6 +141,7 @@ const BChain = new Blockchain();
 simulateChain(BChain, 5, 3);
 
 module.exports = Blockchain;
-// console.dir(BChain,{depth:null});
 
+// uncomment these to run a simulation
+// console.dir(BChain,{depth:null});
 // console.log("******** Validity of this blockchain: ", BChain.chainIsValid());

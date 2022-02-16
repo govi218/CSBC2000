@@ -4,7 +4,7 @@ This is a blockchain simulator where transactions can be added to a mempool and 
 
 ## Running
 1. Install required modules: `npm install #might need sudo`
-2. Run a node on one terminal by specifying a port: `PORT=8080 node blockchain-peer.js`
+2. Run a node on one terminal by specifying a port: `PORT=8000 && node blockchain-peer.js`
 3. Run as many nodes as you want in separate terminals using the above command with different ports
 
 ## Interacting with the blockchain
@@ -16,5 +16,5 @@ You can simulate transactions using some HTTP request client like cURL (terminal
 ## Docker
 You can run a node as a docker container.
 - First, build the container using: `docker build .`. This will generate a random container ID.
-- Then, you can run the node by specifying a port (such as 8082): `docker run -t -e PORT=8082 --expose 8082 -p 8082:8082 <CONTAINER-ID>`
+- Then, you can run the node by specifying a port (such as 8080): `export PORT=8000 && docker run -e PORT=$PORT --expose $PORT -p $PORT:$PORT <CONTAINER-ID>`
 - This will spin up a node you on your port that you can make requests to
